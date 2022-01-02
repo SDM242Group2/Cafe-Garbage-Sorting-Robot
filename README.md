@@ -2,7 +2,7 @@
 A robot for sorting garbage in café, a SUSTech SDIM Project
 
 ## Overview
-This project uses 3 Raspberry Pi and 1 STM32 Board, thier funcitons are:
+This project uses 3 Raspberry Pi and 1 STM32 Board, their funcitons are:
 * Main controlling and algorithms
 * Facial recognition and tracking
 * Internal sorting
