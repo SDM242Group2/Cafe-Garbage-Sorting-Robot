@@ -1,4 +1,6 @@
 # The Main Raspberry Pi Code
+![Overview Map](https://user-images.githubusercontent.com/33782218/147873679-069dae48-9289-4eed-b99c-6d2f8e1c48d0.png)
+
 The "main" file is in the "python" directory, it uses "IRsensor", "PAJ7620U2", "Serialing", "Ultrasonic", and "VL53L0X" classes for specific functionalities.
 
 
