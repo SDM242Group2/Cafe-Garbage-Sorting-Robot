@@ -4,13 +4,14 @@ import threading
 import vlc
 import socket
 
+# self-written classes
 import PAJ7620U2
 import VL53L0X
 import Serialing
 import Ultrasonic
 import IRsensor
 
-#bcm
+# bcm
 TRIG = 18
 ECHO = 23
 
@@ -80,12 +81,14 @@ startsorting_audio = vlc.MediaPlayer("file:///home/pi/Desktop/xiaoai/startsortin
 straightlinemode_audio = vlc.MediaPlayer("file:///home/pi/Desktop/xiaoai/straightlinemode.mp3")
 thankyou_audio = vlc.MediaPlayer("file:///home/pi/Desktop/xiaoai/thankyou.mp3")
 
+# return average of a list
 def average(list):
     sum = 0
     for i in list:
         sum += i
     return sum / len(list)
 
+# return the number of values in the list that compare to the input value
 def compare_count(list, compare, value):
     sum = 0
     if compare == '=':
@@ -110,6 +113,7 @@ def compare_count(list, compare, value):
                 sum += 1
     return sum
 
+# Ultrasonic distancing thread
 class ultThread(threading.Thread):
     # def _init_(self):
     #     threading.Thread._init_(self)
@@ -138,6 +142,7 @@ class ultThread(threading.Thread):
             if ult_d <= ULT_NEAR_LIMIT:
                 ult_near = True
 
+# ToF distancing thread
 class tofThread(threading.Thread):
     def run(self):
         global tof_d
@@ -176,6 +181,7 @@ class tofThread(threading.Thread):
                 tof_near = False
             time.sleep(0.1)
 
+# IR sensors thread.
 class irThread(threading.Thread):
     def run(self):
         global ir_left_near
@@ -226,6 +232,7 @@ class irThread(threading.Thread):
             
             time.sleep(0.1)
 
+# Gestures recognition thread.
 class gesThread(threading.Thread):
     def run(self):
         global gesture
@@ -234,6 +241,7 @@ class gesThread(threading.Thread):
             gesture = ges.check_gesture()
             time.sleep(0.1)
 
+# Audio playing for modes
 class modeAudioThread(threading.Thread):
     def run(self):
         global mode
@@ -256,6 +264,7 @@ class modeAudioThread(threading.Thread):
                 time.sleep(3)
                 automode_audio.stop()
 
+# notificataion audio playing
 class notificationAudioThread(threading.Thread):
     def run(self):
         global ult_near
@@ -275,20 +284,21 @@ class notificationAudioThread(threading.Thread):
                 time.sleep(2)
                 thankyou_audio.stop()
 
+# get facial position from the facial Raspberry Pi
 class faceThread(threading.Thread):
      def run(self):
         global angle
         global face_left
         global face_right
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('192.168.1.113', 6666))   #链接刚刚绑定的ip和端口号
+        s.connect(('192.168.1.113', 6666))
         while True:
-            msg = s.recv(3)    #接收数据（字节数）
-            msg = msg.decode('utf-8')   #解码
-            if msg[0] == '0': # different from zyz
+            msg = s.recv(3) 
+            msg = msg.decode('utf-8') 
+            if msg[0] == '0':
                 angle = -int(msg[0:3])
             else:
-                angle = int(msg[0:3]) # inverse form zyz
+                angle = int(msg[0:3])
             
             if angle <= FACE_LEFT_LIMIT:
                 face_left = True
@@ -300,6 +310,8 @@ class faceThread(threading.Thread):
                 face_left = False
                 face_right = False
 
+                
+# Main Program Starts Here!
 if __name__ == '__main__':
     srl = Serialing.Serialing()
     
@@ -334,16 +346,7 @@ if __name__ == '__main__':
         mode = srl.read_string_message()
 
         if mode == 's': # straight line mode, joy stick up
-            # play audio
-            # if mode_audio_flag != "s":
-            #     straightlinemode_audio.play()
-            #     mode_audio_flag = "s"
-
             if ult_near or tof_near:
-                # detect human, stop
-                # if notification_audio_flag != "excuseme":
-                #     excuseme_audio.play()
-                #     notification_audio_flag = "excuseme"
                 srl.stop()
                 d_near_flag = True
             elif gesture != "" and gesture != None:
@@ -380,10 +383,6 @@ if __name__ == '__main__':
         elif mode == 'a': # auto mode, joy stick down
             
             if ult_near or tof_near:
-                # detect human, stop
-                # if notification_audio_flag != "excuseme":
-                #     excuseme_audio.play()
-                #     notification_audio_flag = "excuseme"
                 srl.stop()
                 d_near_flag = True
 
@@ -415,6 +414,3 @@ if __name__ == '__main__':
             pass
 
         time.sleep(0.05)
-
-# tof.stop_ranging()
-# tof.close()
